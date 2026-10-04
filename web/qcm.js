@@ -434,6 +434,7 @@ function closeLightbox() {
 // ── panel shell ──────────────────────────────────────────────────
 function buildPanel() {
   panel = h("div", { class: "qcm-panel", hidden: true });
+  panel.addEventListener("wheel", (ev) => ev.stopPropagation(), { passive: true }); // scroll the list, don't zoom the canvas
   const handle = h("div", { class: "qcm-resize", title: "Drag to resize" });
   const search = h("input", { type: "search", class: "qcm-search", placeholder: "Filter by prompt, model, LoRA or workflow…", "aria-label": "Filter jobs" });
   let searchTimer = null;
@@ -587,7 +588,9 @@ function tagWorkflowName() {
 function css() {
   const style = document.createElement("style");
   style.textContent = `
-  .qcm-panel { position:relative; height:100%; box-sizing:border-box; display:flex; flex-direction:column; min-width:320px;
+  /* the right slot of ComfyUI's grid would otherwise grow to the panel's full content height and get clipped */
+  .comfyui-body-right:has(> .qcm-panel:not([hidden])) { min-height:0; overflow:hidden; display:flex; }
+  .qcm-panel { position:relative; height:100%; min-height:0; box-sizing:border-box; display:flex; flex-direction:column; min-width:320px;
     background: var(--comfy-menu-bg, #202020); color: var(--fg-color, #ddd); border-left:1px solid var(--border-color, #444); font-size:13px; }
   .qcm-panel.floating { position:fixed; right:0; top:var(--qcm-top, 40px); bottom:0; z-index:1000; box-shadow:-6px 0 18px rgba(0,0,0,.35); }
   .qcm-panel[hidden] { display:none; }
