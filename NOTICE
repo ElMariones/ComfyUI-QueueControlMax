@@ -1,0 +1,11 @@
+ComfyUI-QueueControlMax
+Copyright 2026 ElMariones
+
+This product is an independent implementation. Its feature set was inspired by:
+
+- ComfyUI-QueueControl (https://github.com/seeker-ktf/ComfyUI-QueueControl), Apache License 2.0, by seeker-ktf:
+  queue pause / resume, saved queue, persistent (auto-saved and auto-restored) queue.
+- comfyui_queue_manager (https://github.com/QuietNoise/comfyui_queue_manager), GPL-3.0, by QuietNoise:
+  archive (parked jobs), export / import, filtering by workflow, output gallery, open file location.
+
+No source code from either project is included.

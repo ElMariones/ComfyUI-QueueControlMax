@@ -1,0 +1,16 @@
+[project]
+name = "comfyui-queuecontrolmax"
+version = "1.0.0"
+description = "One queue manager for ComfyUI, docked on the right: FIFO queue with pause and reordering, job details (model, LoRAs, prompt), parking, autosave / auto-restore / auto-resume, named saves, export / import, and a persistent searchable history with images and one-click 'open workflow'. No extra dependencies."
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/ElMariones/ComfyUI-QueueControlMax"
+
+[tool.comfy]
+PublisherId = "elmariones"
+DisplayName = "ComfyUI-QueueControlMax"
+Icon = ""
