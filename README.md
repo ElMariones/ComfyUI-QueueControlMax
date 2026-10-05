@@ -61,9 +61,9 @@ These files contain your full prompts and workflows unencrypted. Keep that in mi
 Windows PowerShell loop that restarts ComfyUI after a crash and tells QueueControlMax to resume. After a fatal CUDA error, such as "illegal memory access" followed by `Fatal Python error: Aborted`, Windows can keep the dying process alive for minutes. So the loop also restarts ComfyUI when its web server stops answering, not only when the process exits:
 
 ```powershell
-$args = '-s','ComfyUI\main.py','--windows-standalone-build'
+$comfyArgs = '-s','ComfyUI\main.py','--windows-standalone-build'
 while ($true) {
-    $p = Start-Process .\python_embeded\python.exe -ArgumentList $args -NoNewWindow -PassThru
+    $p = Start-Process .\python_embeded\python.exe -ArgumentList $comfyArgs -NoNewWindow -PassThru
     $null = $p.Handle; $up = $false; $down = $null; $killed = $false
     while (-not $p.WaitForExit(5000)) {                  # health check every 5 s
         try { $null = Invoke-WebRequest http://127.0.0.1:8188/system_stats -UseBasicParsing -TimeoutSec 5; $up = $true; $down = $null }
