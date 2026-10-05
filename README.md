@@ -58,13 +58,20 @@ These files contain your full prompts and workflows unencrypted. Keep that in mi
 
 ## Auto-resume after a crash (launcher example)
 
-Windows PowerShell loop that restarts ComfyUI after a crash and tells QueueControlMax to resume:
+Windows PowerShell loop that restarts ComfyUI after a crash and tells QueueControlMax to resume. After a fatal CUDA error, such as "illegal memory access" followed by `Fatal Python error: Aborted`, Windows can keep the dying process alive for minutes. So the loop also restarts ComfyUI when its web server stops answering, not only when the process exits:
 
 ```powershell
+$args = '-s','ComfyUI\main.py','--windows-standalone-build'
 while ($true) {
-    & .\python_embeded\python.exe -s ComfyUI\main.py --windows-standalone-build
-    if ($LASTEXITCODE -eq 0) { break }               # normal exit
-    $env:QCM_RESTARTED_AFTER_CRASH = '1'             # crashed: resume the restored queue
+    $p = Start-Process .\python_embeded\python.exe -ArgumentList $args -NoNewWindow -PassThru
+    $null = $p.Handle; $up = $false; $down = $null; $killed = $false
+    while (-not $p.WaitForExit(5000)) {                  # health check every 5 s
+        try { $null = Invoke-WebRequest http://127.0.0.1:8188/system_stats -UseBasicParsing -TimeoutSec 5; $up = $true; $down = $null }
+        catch { if ($up) { if (-not $down) { $down = Get-Date } elseif (((Get-Date) - $down).TotalSeconds -ge 45) {
+            Stop-Process -Id $p.Id -Force; $killed = $true; break } } }   # crashed or hung
+    }
+    if (-not $killed -and $p.ExitCode -eq 0) { break }   # normal exit
+    $env:QCM_RESTARTED_AFTER_CRASH = '1'                 # resume the restored queue
     Start-Sleep 5
 }
 ```
