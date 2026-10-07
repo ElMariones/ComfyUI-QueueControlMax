@@ -26,6 +26,17 @@ def _linked(prompt, node, key):
     return prompt.get(str(link[0])) if isinstance(link, list) and link else None
 
 
+def _linked_text(prompt, node, key):
+    """Text behind a sampler's positive/negative input. Encoders that output both (e.g. TextEncodeQwenImage21)
+    keep the negative in their own widget, so pick it by the output slot the link comes from."""
+    link = (node or {}).get("inputs", {}).get(key)
+    src = _linked(prompt, node, key)
+    if src and isinstance(link, list) and len(link) > 1 and link[1] == 1 and "negative_prompt" in src.get("inputs", {}):
+        val = src["inputs"]["negative_prompt"]
+        return val.strip() if isinstance(val, str) else ""
+    return _text(src)
+
+
 def _value(node, key):
     """A widget value, or None when the input is wired to another node (e.g. a Quality Preset)."""
     val = (node or {}).get("inputs", {}).get(key)
@@ -64,8 +75,8 @@ def summarize(prompt, extra=None):
     samplers = [n for n in nodes if n.get("class_type") in SAMPLER_CLASSES]
     k = samplers[0] if samplers else None
     if k:
-        out["positive"] = _text(_linked(prompt, k, "positive"))
-        out["negative"] = _text(_linked(prompt, k, "negative"))
+        out["positive"] = _linked_text(prompt, k, "positive")
+        out["negative"] = _linked_text(prompt, k, "negative")
     if not out["positive"]:
         for n in nodes:
             title = str(n.get("_meta", {}).get("title", "")).lower()
