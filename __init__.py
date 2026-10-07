@@ -246,6 +246,15 @@ async def post_settings(request):
     return web.json_response(store.get_settings())
 
 
+def repair_negatives():
+    """Entries saved before 59ff248 show the positive prompt as the negative for TextEncodeQwenImage21; re-read them."""
+    for table in ("history", "parked"):
+        rows = store.query(f"SELECT id, prompt FROM {table} WHERE negative != '' AND negative = positive")
+        fixed = [(summarize(store.unpack(r["prompt"]))["negative"], r["id"]) for r in rows if r["prompt"]]
+        store.executemany(f"UPDATE {table} SET negative = ? WHERE id = ?", fixed)
+
+
+repair_negatives()
 queue_ctl.install()
 PromptServer.instance.loop.create_task(queue_ctl.startup())
 log.info("[QueueControlMax] loaded - data in %s", store.DATA_DIR)
